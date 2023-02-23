@@ -12,3 +12,62 @@ The goal is to create an HTTP API for uploading, optimizing, and serving images.
 
 1. **Functionality.** The developed solution should function as described in the "Summary" section. However, if you think that you can create a solution better than described in the "Summary" section, you are welcome to do so.
 2. **Code simplicity**. The architecture should be simple and easy to understand, the code should be well-formatted and consistent. Usage of code formatters (like gofmt) and linters (like golangci-lint) is encouraged.
+
+___
+
+## ❓ Questions
+
+Workflow:
+
+```note
+
+    Image, ID - payloads
+
+====================================================================================
+
+                         .<(img)[exchange]>. 
+                        /                   \
+[User] --(img)-> [Go HTTP]              [RabbitMQ]
+                                             ^|   
+                                             |v
+                                        [Go Service] 
+                                            |^
+                                            v|
+                                        [Img folder]
+
+====================================================================================
+
+                         .>(img)[exchange]>. 
+                        /                   \
+[User] --(img)-> [Go HTTP]              [RabbitMQ]
+                        \                    |   
+                         \                   v
+                        [Img folder] <-- [Go Service] 
+```
+
+Questions:
+
+* Do I need the database (which one) for saving images or not?
+  * [gorm](https://gorm.io/) of raw sql?
+* Library for RabbitMQ:
+  * [Go RabbitMQ Client Library (rabbitmq/amqp091-go)](https://github.com/rabbitmq/amqp091-go)
+
+App structure:
+
+```note
+/internal
+    /domain
+        /models         // `Image` models
+        /repositories
+    /infrastructure     // if DB
+        /gorm
+    /delivery
+        /http           // HTTP Server
+            /rest
+                /api
+        /rabbitmq       // RabbitMQ Client
+            /client
+    /services
+        /image-compress // Image Compress
+        /image-repository
+```
