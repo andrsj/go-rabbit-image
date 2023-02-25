@@ -6,17 +6,24 @@ import (
 )
 
 type Handler struct {
-	Engine *gin.Engine
+	engine *gin.Engine
 }
 
 func New() *Handler {
 	r := gin.Default()
+	r.HandleMethodNotAllowed = true
 	return &Handler{
-		Engine: r,
+		engine: r,
 	}
 }
 
-func (s *Handler) Register(router api.APIInterface) {
-	s.Engine.GET("/", router.Status)
-	s.Engine.GET("/l", router.LongTimeStatus)
+func (h *Handler) GetGinEngine() *gin.Engine {
+	return h.engine
+}
+
+func (h *Handler) Register(router api.APIInterface) {
+	h.engine.GET("/", router.Status)
+	h.engine.GET("/l", router.LongTimeStatus)
+	h.engine.POST("/img", router.PostImage)
+	h.engine.GET("/img/:id", router.GetImage)
 }

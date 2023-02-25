@@ -9,7 +9,7 @@ import (
 func New(h *handler.Handler) *http.Server {
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: h.Engine,
+		Handler: h.GetGinEngine(),
 	}
 	return server
 }
