@@ -15,18 +15,11 @@ The goal is to create an HTTP API for uploading, optimizing, and serving images.
 
 ___
 
-## ❓ Questions
+## 💥 Realization
 
 Workflow:
 
 ![App infrastructure](./img/app.png)
-
-Questions:
-
-* Do I need the database (which one) for saving images or not?
-  * [gorm](https://gorm.io/) of raw sql?
-* Library for RabbitMQ:
-  * [Go RabbitMQ Client Library (rabbitmq/amqp091-go)](https://github.com/rabbitmq/amqp091-go)
 
 App structure:
 
@@ -61,3 +54,28 @@ docker run --name some-postgres -e POSTGRES_PASSWORD=mySecretPassword -d postgre
     /gorm - gorm example
     /resizer - service cmd
 ```
+
+## 💯 Testing
+
+I've using the [Thunder client](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client) (`rangav.vscode-thunder-client`) extension from VS Code to proceed HTTP requests
+
+The HTTP methods collections that have been used placed there: [collection.json](./thunder-collection_RabbitMQ%20Image.json)
+
+> PAY attention: in POST method you need replace the path to the image file in the body
+
+```json
+"body": {
+    "type": "formdata",
+    "raw": "",
+    "form": [],
+    "files": [
+        {
+            "name": "image",
+            // v H E R E v
+            "value": "c:\\...\\img\\app.png"
+        }
+    ]
+},
+```
+
+![Import Collection for Thunder Client](./img/ImportThunderCollection.png)

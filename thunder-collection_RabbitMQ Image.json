@@ -1,0 +1,54 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "RabbitMQ Image",
+    "dateExported": "2023-02-25T20:23:55.944Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "a15f8feb-de44-4b15-9788-c5ad98c382dc",
+            "colId": "a51df411-c010-4a1f-bb9a-dc3d1954ba4c",
+            "containerId": "",
+            "name": "POST image",
+            "url": "localhost:8080/img",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-02-25T20:23:38.227Z",
+            "modified": "2023-02-25T20:23:38.227Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "formdata",
+                "raw": "",
+                "form": [],
+                "files": [
+                    {
+                        "name": "image",
+                        "value": "c:\\Users\\ADerkach\\Desktop\\Image\\img\\app.png"
+                    }
+                ]
+            },
+            "tests": []
+        },
+        {
+            "_id": "7ef18e2a-1cde-4acb-95bd-bf25b6fd82c4",
+            "colId": "a51df411-c010-4a1f-bb9a-dc3d1954ba4c",
+            "containerId": "",
+            "name": "GET Image",
+            "url": "localhost:8080/img/28011247-c534-474e-9091-a4a2a71cdc10/?quality=100",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-02-25T20:23:46.745Z",
+            "modified": "2023-02-25T20:23:46.745Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "quality",
+                    "value": "100",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        }
+    ]
+}

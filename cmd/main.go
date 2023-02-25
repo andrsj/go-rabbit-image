@@ -14,6 +14,7 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/rest/api"
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/server"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/file/repository"
+	"github.com/andrsj/go-rabbit-image/internal/services/image/compress"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/storage"
 )
 
@@ -24,8 +25,9 @@ func main() {
 		log.Fatalf("Can't create file storage: %s", err)
 	}
 	fileService := storage.New(fileStorage)
+	compressService := compress.New()
 
-	api_router := api.New(fileService)
+	api_router := api.New(fileService, compressService)
 	api_handler := handler.New()
 	api_handler.Register(api_router)
 
@@ -41,6 +43,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
+	server.SetKeepAlivesEnabled(false)
 	duration := time.Second * 5
 	log.Printf("Shutdown server . . . Timeout: %v", duration)
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
