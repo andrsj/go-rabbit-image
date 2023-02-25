@@ -19,31 +19,7 @@ ___
 
 Workflow:
 
-```note
-
-    Image, ID - payloads
-
-====================================================================================
-
-                         .<(img)[exchange]>. 
-                        /                   \
-[User] --(img)-> [Go HTTP]              [RabbitMQ]
-                                             ^|   
-                                             |v
-                                        [Go Service] 
-                                            |^
-                                            v|
-                                        [Img folder]
-
-====================================================================================
-
-                         .>(img)[exchange]>. 
-                        /                   \
-[User] --(img)-> [Go HTTP]              [RabbitMQ]
-                        \                    |   
-                         \                   v
-                        [Img folder] <-- [Go Service] 
-```
+![App infrastructure](./img/app.png)
 
 Questions:
 
@@ -70,4 +46,18 @@ App structure:
     /services
         /image-compress // Image Compress
         /image-repository
+```
+
+Usage:
+
+```note
+docker run -d --hostname my-rabbit --name some-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
+
+docker run --name some-postgres -e POSTGRES_PASSWORD=mySecretPassword -d postgres
+
+/cmd
+    /publish - send one msg
+    /receive - read all msg
+    /gorm - gorm example
+    /resizer - service cmd
 ```
