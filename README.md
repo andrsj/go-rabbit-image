@@ -26,19 +26,22 @@ App structure:
 ```note
 /internal
     /domain
-        /models         // `Image` models
+        /models
         /repositories
-    /infrastructure     // if DB
+    /infrastructure
+        /file
+            /repository
         /gorm
     /delivery
-        /http           // HTTP Server
+        /http
             /rest
                 /api
-        /rabbitmq       // RabbitMQ Client
+        /rabbitmq
             /client
     /services
-        /image-compress // Image Compress
-        /image-repository
+        /image
+            /compress
+            /storage
 ```
 
 Usage:
