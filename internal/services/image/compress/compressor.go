@@ -6,7 +6,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-type CompressorInterface interface {
+type Compressor interface {
 	CompressImage(img image.Image, percentage int) image.Image
 }
 

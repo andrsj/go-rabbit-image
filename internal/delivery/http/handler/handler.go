@@ -21,9 +21,11 @@ func (h *Handler) GetGinEngine() *gin.Engine {
 	return h.engine
 }
 
-func (h *Handler) Register(router api.APIInterface) {
+func (h *Handler) Register(router api.API) {
+	// TODO remove unnecessary urls
 	h.engine.GET("/", router.Status)
 	h.engine.GET("/l", router.LongTimeStatus)
 	h.engine.POST("/img", router.PostImage)
 	h.engine.GET("/img/:id", router.GetImage)
+	h.engine.GET("/send/:text", router.Publish)
 }

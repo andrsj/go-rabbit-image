@@ -13,13 +13,19 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/handler"
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/rest/api"
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/server"
+	"github.com/andrsj/go-rabbit-image/internal/delivery/rabbitmq/client"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/file/repository"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/compress"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/storage"
 )
 
+const (
+	path      = "C:/Users/ADerkach/Desktop/Image"
+	rabbitURL = "amqp://guest:guest@localhost:5672/"
+)
+
 func main() {
-	pathToServerFiles := filepath.Join("C:/Users/ADerkach/Desktop/Image", "/server_images")
+	pathToServerFiles := filepath.Join(path, "/server_images")
 	fileStorage, err := repository.New(pathToServerFiles)
 	if err != nil {
 		log.Fatalf("Can't create file storage: %s", err)
@@ -27,7 +33,12 @@ func main() {
 	fileService := storage.New(fileStorage)
 	compressService := compress.New()
 
-	api_router := api.New(fileService, compressService)
+	publisher, err := client.New(rabbitURL, "QUEUE")
+	if err != nil {
+		panic(err)
+	}
+
+	api_router := api.New(fileService, compressService, publisher)
 	api_handler := handler.New()
 	api_handler.Register(api_router)
 

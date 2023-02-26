@@ -1,19 +1,19 @@
 package storage
 
-import "github.com/andrsj/go-rabbit-image/internal/infrastructure/file/repository"
+import "github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
 
-type FileStorageInterface interface {
+type FileStorage interface {
 	WriteImage(image []byte, id string, level string) error
 	ReadImage(id string, level string) ([]byte, error)
 }
 
 type fileStorageService struct {
-	fileStorage repository.FileRepositoryInterface
+	fileStorage file.FileRepository
 }
 
-var _ FileStorageInterface = (*fileStorageService)(nil)
+var _ FileStorage = (*fileStorageService)(nil)
 
-func New(storage repository.FileRepositoryInterface) *fileStorageService {
+func New(storage file.FileRepository) *fileStorageService {
 	return &fileStorageService{
 		fileStorage: storage,
 	}

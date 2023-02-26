@@ -7,11 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
 )
 
 type localFileStorage struct {
 	directoryPath string
 }
+
+var _ file.FileRepository = (*localFileStorage)(nil)
 
 func New(pathToDir string) (*localFileStorage, error) {
 	lfs := &localFileStorage{}
@@ -104,5 +108,3 @@ func (l *localFileStorage) GetImage(id string, level string) ([]byte, error) {
 	}
 	return data, nil
 }
-
-var _ FileRepositoryInterface = (*localFileStorage)(nil)
