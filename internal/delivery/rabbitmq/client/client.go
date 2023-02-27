@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/andrsj/go-rabbit-image/internal/domain/dto"
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/queue"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -68,7 +69,7 @@ func (r *rabbitMQ) Publish(ctx context.Context, message []byte, image_id, conten
 	)
 }
 
-func (r *rabbitMQ) ConsumeMessages() (<-chan []byte, <-chan error) {
+func (r *rabbitMQ) ConsumeMessages() (<-chan dto.MessageDTO, <-chan error) {
 	msgs, err := r.channel.Consume(
 		r.MainQueue,
 		"",
@@ -82,12 +83,16 @@ func (r *rabbitMQ) ConsumeMessages() (<-chan []byte, <-chan error) {
 		panic(err)
 	}
 
-	messageCh := make(chan []byte)
+	messageCh := make(chan dto.MessageDTO)
 	errorCh := make(chan error, 1)
 
 	go func() {
 		for msg := range msgs {
-			messageCh <- msg.Body
+			messageCh <- dto.MessageDTO{
+				Body:        msg.Body,
+				ImageID:     msg.Headers["id"].(string),
+				ContentType: msg.ContentType,
+			}
 		}
 		errorCh <- amqp.ErrClosed
 	}()

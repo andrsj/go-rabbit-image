@@ -28,4 +28,5 @@ func (h *Handler) Register(router api.API) {
 	h.engine.POST("/img", router.PostImage)
 	h.engine.GET("/img/:id", router.GetImage)
 	h.engine.GET("/send/:text", router.Publish)
+	h.engine.POST("/send-image", router.PublishImage)
 }

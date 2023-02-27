@@ -17,6 +17,7 @@ type API interface {
 
 	// Temporary
 	Publish(ctx *gin.Context)
+	PublishImage(ctx *gin.Context)
 }
 
 type api struct {

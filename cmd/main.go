@@ -16,13 +16,14 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/delivery/rabbitmq/client"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/file/repository"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker"
+	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker/compressor"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/compress"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/storage"
 	"github.com/andrsj/go-rabbit-image/internal/services/publisher"
 )
 
 const (
-	path      = "C:/Users/ADerkach/Desktop/Image/"
+	path      = "C:/Users/ADerkach/Desktop/go-rabbit-image/"
 	rabbitURL = "amqp://guest:guest@localhost:5672/"
 )
 
@@ -47,7 +48,9 @@ func main() {
 
 	jobContext, jobCancelFunc := context.WithCancel(context.Background())
 
-	job := worker.New(rabbitClient, jobCancelFunc)
+	// TODO need refactor this SHIT
+	compressor := compressor.New()
+	job := worker.New(rabbitClient, jobCancelFunc, fileStorage, compressor)
 	job.Start(jobContext)
 
 	server := server.New(api_handler)
