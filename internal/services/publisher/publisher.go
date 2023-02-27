@@ -1,10 +1,8 @@
-package broker
+package publisher
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/andrsj/go-rabbit-image/internal/delivery/rabbitmq/client"
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/queue"
 )
 
@@ -14,14 +12,10 @@ type messagePublisherService struct {
 
 var _ queue.Publisher = (*messagePublisherService)(nil)
 
-func NewPublisher(url, queue_name string) (*messagePublisherService, error) {
-	client, err := client.New(url, queue_name)
-	if err != nil {
-		return nil, fmt.Errorf("can't start message broker: %s", err)
-	}
+func New(publisher queue.Publisher) *messagePublisherService {
 	return &messagePublisherService{
-		publisher: client,
-	}, nil
+		publisher: publisher,
+	}
 }
 
 func (m *messagePublisherService) Publish(ctx context.Context, message []byte, image_id string, contentType string) error {

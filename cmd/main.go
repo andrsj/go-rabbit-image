@@ -15,12 +15,14 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/delivery/http/server"
 	"github.com/andrsj/go-rabbit-image/internal/delivery/rabbitmq/client"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/file/repository"
+	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/compress"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/storage"
+	"github.com/andrsj/go-rabbit-image/internal/services/publisher"
 )
 
 const (
-	path      = "C:/Users/ADerkach/Desktop/Image"
+	path      = "C:/Users/ADerkach/Desktop/Image/"
 	rabbitURL = "amqp://guest:guest@localhost:5672/"
 )
 
@@ -33,14 +35,20 @@ func main() {
 	fileService := storage.New(fileStorage)
 	compressService := compress.New()
 
-	publisher, err := client.New(rabbitURL, "QUEUE")
+	rabbitClient, err := client.New(rabbitURL, "QUEUE")
 	if err != nil {
 		panic(err)
 	}
+	publisher := publisher.New(rabbitClient)
 
 	api_router := api.New(fileService, compressService, publisher)
 	api_handler := handler.New()
 	api_handler.Register(api_router)
+
+	jobContext, jobCancelFunc := context.WithCancel(context.Background())
+
+	job := worker.New(rabbitClient, jobCancelFunc)
+	job.Start(jobContext)
 
 	server := server.New(api_handler)
 
@@ -53,6 +61,8 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
+	job.Stop()
 
 	server.SetKeepAlivesEnabled(false)
 	duration := time.Second * 5
