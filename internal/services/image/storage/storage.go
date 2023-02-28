@@ -3,8 +3,8 @@ package storage
 import "github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
 
 type FileStorage interface {
-	WriteImage(image []byte, id string, level string) error
-	ReadImage(id string, level string) ([]byte, error)
+	WriteImageToStorage(image []byte, id string, level string) error
+	ReadImageFromStorage(id string, level string) ([]byte, error)
 }
 
 type fileStorageService struct {
@@ -19,14 +19,14 @@ func New(storage file.FileRepository) *fileStorageService {
 	}
 }
 
-func (f *fileStorageService) WriteImage(image []byte, name string, level string) error {
+func (f *fileStorageService) WriteImageToStorage(image []byte, name string, level string) error {
 	if err := f.fileStorage.CreateImage(image, name, level); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f fileStorageService) ReadImage(name string, level string) ([]byte, error) {
+func (f fileStorageService) ReadImageFromStorage(name string, level string) ([]byte, error) {
 	data, err := f.fileStorage.GetImage(name, level)
 	if err != nil {
 		return nil, err

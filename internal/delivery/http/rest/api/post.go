@@ -9,22 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a *api) Publish(ctx *gin.Context) {
-	message := ctx.Param("text")
-	err := a.publisherService.Publish(ctx, []byte(message), "NO ID", "plain/text")
-	if err != nil {
-		ctx.JSON(
-			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
-		)
-	}
-
-	ctx.JSON(
-		http.StatusOK,
-		gin.H{"message": fmt.Sprintf("Text '%s' sent", message)},
-	)
-}
-
 func (a *api) PublishImage(ctx *gin.Context) {
 	file, err := ctx.FormFile("image")
 	if err != nil {
