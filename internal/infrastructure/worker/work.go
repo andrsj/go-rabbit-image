@@ -14,7 +14,7 @@ const (
 var levels = []int{level75, level50, level25}
 
 func (c *worker) Start() {
-	messageCh, errorCh := c.client.ConsumeMessages()
+	messageCh, errorCh := c.client.MustConsumeMessages()
 	go func() {
 		for {
 			select {

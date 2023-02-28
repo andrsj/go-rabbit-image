@@ -10,6 +10,9 @@ import (
 
 const (
 	DefaultLevel = "100"
+	Level1       = "75"
+	Level2       = "50"
+	Level3       = "25"
 )
 
 type imageParams struct {
@@ -20,9 +23,8 @@ type imageParams struct {
 
 func (a *api) GetImage(ctx *gin.Context) {
 	params := imageParams{
-		ID:            ctx.Param("id"),
-		Quality:       ctx.DefaultQuery("quality", DefaultLevel),
-		AllowedValues: []string{DefaultLevel, "75", "50", "25"},
+		ID:      ctx.Param("id"),
+		Quality: ctx.DefaultQuery("quality", DefaultLevel),
 	}
 
 	err := validateGetImageParams(params)
@@ -60,20 +62,12 @@ func validateGetImageParams(params imageParams) error {
 		return fmt.Errorf("invalid format of ID")
 	}
 
-	if !contains(params.AllowedValues, params.Quality) {
+	switch params.Quality {
+	case DefaultLevel, Level1, Level2, Level3:
+		return nil
+	default:
 		return fmt.Errorf("invalid quality parameter: use 100, 75, 50 or 25")
 	}
-
-	return nil
-}
-
-func contains(list []string, value string) bool {
-	for _, item := range list {
-		if item == value {
-			return true
-		}
-	}
-	return false
 }
 
 func isValidUUID(s string) bool {

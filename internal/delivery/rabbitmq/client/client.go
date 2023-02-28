@@ -63,7 +63,7 @@ func (r *rabbitMQ) Publish(ctx context.Context, message []byte, image_id, conten
 	)
 }
 
-func (r *rabbitMQ) ConsumeMessages() (<-chan dto.MessageDTO, <-chan error) {
+func (r *rabbitMQ) MustConsumeMessages() (<-chan dto.MessageDTO, <-chan error) {
 	msgs, err := r.channel.Consume(
 		r.MainQueue,
 		"",

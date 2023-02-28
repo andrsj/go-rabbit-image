@@ -17,30 +17,33 @@ func (a *api) PublishImage(ctx *gin.Context) {
 
 	src, err := file.Open()
 	if err != nil {
-		ctx.JSON(
+		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
+			gin.H{"error": fmt.Sprintf("Can't open the file: %s", err)},
 		)
+		return
 	}
 	defer src.Close()
 
 	buf := make([]byte, file.Size)
 	_, err = io.ReadFull(src, buf)
 	if err != nil {
-		ctx.JSON(
+		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
-			gin.H{"error": fmt.Sprintf("Can't read the image: %s", err.Error())},
+			gin.H{"error": fmt.Sprintf("Can't read the image: %s", err)},
 		)
+		return
 	}
 
 	imageID := uuid.New().String()
 
 	err = a.publisherService.Publish(ctx, buf, imageID, http.DetectContentType(buf))
 	if err != nil {
-		ctx.JSON(
+		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
+			gin.H{"error": fmt.Sprintf("Can't publish the image: %s", err)},
 		)
+		return
 	}
 
 	ctx.JSON(

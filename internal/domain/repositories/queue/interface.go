@@ -11,7 +11,7 @@ type Publisher interface {
 }
 
 type Consumer interface {
-	ConsumeMessages() (<-chan dto.MessageDTO, <-chan error)
+	MustConsumeMessages() (<-chan dto.MessageDTO, <-chan error)
 }
 
 type MessageBroker interface {
