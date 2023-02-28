@@ -6,7 +6,6 @@ import (
 
 	"github.com/andrsj/go-rabbit-image/internal/domain/dto"
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/queue"
-	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -16,12 +15,7 @@ type rabbitMQ struct {
 	MainQueue string
 }
 
-type MessageBroker interface {
-	queue.Publisher
-	worker.Consumer
-}
-
-var _ MessageBroker = (*rabbitMQ)(nil)
+var _ queue.MessageBroker = (*rabbitMQ)(nil)
 
 func New(url, queue_name string) (*rabbitMQ, error) {
 	conn, err := amqp.Dial(url)

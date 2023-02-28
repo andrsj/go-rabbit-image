@@ -3,17 +3,13 @@ package worker
 import (
 	"context"
 
-	"github.com/andrsj/go-rabbit-image/internal/domain/dto"
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
+	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/queue"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker/compressor"
 )
 
-type Consumer interface {
-	ConsumeMessages() (<-chan dto.MessageDTO, <-chan error)
-}
-
 type WorkerParams struct {
-	client         Consumer
+	client         queue.Consumer
 	fileRepository file.FileRepository
 	compressor     compressor.Compressor
 
@@ -23,7 +19,7 @@ type WorkerParams struct {
 
 type WorkerOption func(*WorkerParams)
 
-func WithClient(client Consumer) WorkerOption {
+func WithClient(client queue.Consumer) WorkerOption {
 	return func(p *WorkerParams) {
 		p.client = client
 	}
@@ -59,7 +55,7 @@ type Worker interface {
 }
 
 type worker struct {
-	client         Consumer
+	client         queue.Consumer
 	compressor     compressor.Compressor
 	fileRepository file.FileRepository
 
