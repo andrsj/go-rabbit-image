@@ -35,9 +35,20 @@ func (a *api) PublishImage(ctx *gin.Context) {
 		return
 	}
 
+	contentType := http.DetectContentType(buf)
+	switch contentType {
+	case "image/jpeg", "image/png":
+	default:
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{"error": fmt.Sprintf("Can't accept the type '%s': please, use jpg/png type", contentType)},
+		)
+		return
+	}
+
 	imageID := uuid.New().String()
 
-	err = a.publisherService.Publish(ctx, buf, imageID, http.DetectContentType(buf))
+	err = a.publisherService.Publish(ctx, buf, imageID, contentType)
 	if err != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
