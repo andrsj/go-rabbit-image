@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,6 +19,7 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker/compressor"
 	"github.com/andrsj/go-rabbit-image/internal/services/image/storage"
 	"github.com/andrsj/go-rabbit-image/internal/services/publisher"
+	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
 
 const (
@@ -33,27 +33,37 @@ const (
 type App struct {
 	srv *http.Server
 	job worker.Worker
+	log logger.Logger
 }
 
-func New() (*App, error) {
-	pathToServerFiles := filepath.Join(path, image_folder)
-	fileStorage, err := repository.New(pathToServerFiles)
+func New(log logger.Logger) (*App, error) {
+	log = log.Named("app")
+
+	rabbitClient, err := client.New(rabbitURL, queueName, log)
 	if err != nil {
+		err = fmt.Errorf("error connected with RabbitMQ: %s", err)
+		log.Error("Connection error to Message Broker", logger.M{
+			"error": err,
+		})
+		return nil, err
+	}
+	publisher := publisher.New(rabbitClient, log)
+
+	pathToServerFiles := filepath.Join(path, image_folder)
+	fileStorage, err := repository.New(pathToServerFiles, log)
+	if err != nil {
+		log.Error("Can't create file storage", logger.M{
+			"error": err,
+		})
 		return nil, fmt.Errorf("can't create file storage: %s", err)
 	}
-	fileService := storage.New(fileStorage)
+	fileService := storage.New(fileStorage, log)
 
-	rabbitClient, err := client.New(rabbitURL, queueName)
-	if err != nil {
-		return nil, fmt.Errorf("error connected with RabbitMQ: %s", err)
-	}
-	publisher := publisher.New(rabbitClient)
-
-	api_router := api.New(fileService, publisher)
-	api_handler := handler.New()
+	api_router := api.New(fileService, publisher, log)
+	api_handler := handler.New(log)
 	api_handler.Register(api_router)
 
-	compressor := compressor.New()
+	compressor := compressor.New(log)
 	jobContext, jobCancelFunc := context.WithCancel(context.Background())
 	job := worker.New(
 		worker.WithClient(rabbitClient),
@@ -61,6 +71,7 @@ func New() (*App, error) {
 		worker.WithCompressor(compressor),
 		worker.WithCancel(jobCancelFunc),
 		worker.WithContext(jobContext),
+		worker.WithLogger(log),
 	)
 
 	server := server.New(api_handler)
@@ -68,38 +79,58 @@ func New() (*App, error) {
 	return &App{
 		srv: server,
 		job: job,
+		log: log,
 	}, nil
 }
 
 func (a *App) Start() {
+
+	a.log.Info("Starting background job", nil)
 	a.job.Start()
 
+	a.log.Info("Starting server", logger.M{
+		"address": a.srv.Addr,
+	})
 	go func() {
 		if err := a.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			a.log.Fatal("Server starting error.", logger.M{
+				"error": err,
+			})
 		}
 	}()
 }
 
 func (a *App) Stop() error {
+	a.log.Info("Stopping background job", nil)
 	a.job.Stop()
+
+	a.log.Info("Closing keep-alive connections", nil)
 	a.srv.SetKeepAlivesEnabled(false)
 
-	log.Printf("Shutdown server . . . Timeout: %v", TimeoutDuration)
+	a.log.Info("Shutdown server . . . Timeout", logger.M{
+		"timeout": TimeoutDuration,
+	})
 	ctx, cancel := context.WithTimeout(context.Background(), TimeoutDuration)
 	defer cancel()
 
 	if err := a.srv.Shutdown(ctx); err != nil {
+		a.log.Error("Error shutdown", logger.M{
+			"error": err,
+		})
 		return err
 	}
 
-	log.Println("Server exiting")
+	a.log.Info("Server exiting", nil)
 
 	return nil
 }
 
 func (a *App) WaitForShutdown() {
+	a.log.Info("Waiting for shutdown", nil)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+	sig := <-quit
+	a.log.Info("Got signal for terminating server", logger.M{
+		"signal": sig,
+	})
 }

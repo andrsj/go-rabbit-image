@@ -28,7 +28,6 @@ func NewLogrusLogger(level string) *logrusLogger {
 
 	logger := logrus.New()
 	logger.SetLevel(l)
-	logger.SetFormatter(&logrus.JSONFormatter{})
 	return &logrusLogger{logger: logrus.NewEntry(logger)}
 }
 
@@ -38,22 +37,22 @@ func (l *logrusLogger) Named(name string) Logger {
 	}
 }
 
-func (l *logrusLogger) Debug(message string, args ...interface{}) {
-	l.logger.WithFields(logrus.Fields{"args": args}).Debug(message)
+func (l *logrusLogger) Debug(message string, args M) {
+	l.logger.WithFields(logrus.Fields(args)).Debug(message)
 }
 
-func (l *logrusLogger) Info(message string, args ...interface{}) {
-	l.logger.WithFields(logrus.Fields{"args": args}).Info(message)
+func (l *logrusLogger) Info(message string, args M) {
+	l.logger.WithFields(logrus.Fields(args)).Info(message)
 }
 
-func (l *logrusLogger) Warn(message string, args ...interface{}) {
-	l.logger.WithFields(logrus.Fields{"args": args}).Warn(message)
+func (l *logrusLogger) Warn(message string, args M) {
+	l.logger.WithFields(logrus.Fields(args)).Warn(message)
 }
 
-func (l *logrusLogger) Error(message string, args ...interface{}) {
-	l.logger.WithFields(logrus.Fields{"args": args}).Error(message)
+func (l *logrusLogger) Error(message string, args M) {
+	l.logger.WithFields(logrus.Fields(args)).Error(message)
 }
 
-func (l *logrusLogger) Fatal(message string, args ...interface{}) {
-	l.logger.WithFields(logrus.Fields{"args": args}).Fatal(message)
+func (l *logrusLogger) Fatal(message string, args M) {
+	l.logger.WithFields(logrus.Fields(args)).Fatal(message)
 }

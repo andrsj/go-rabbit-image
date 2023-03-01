@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/andrsj/go-rabbit-image/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,8 +28,13 @@ func (a *api) GetImage(ctx *gin.Context) {
 		Quality: ctx.DefaultQuery("quality", DefaultLevel),
 	}
 
+	a.logger.Debug("GetImage: Validating image params", logger.M{"params": params})
 	err := validateGetImageParams(params)
 	if err != nil {
+		a.logger.Error("GetImage: Invalid image params", logger.M{
+			"error":  err,
+			"params": params,
+		})
 		ctx.AbortWithStatusJSON(
 			http.StatusBadRequest,
 			gin.H{"error": fmt.Sprintf("Wrong query parameter: %s", err)},
@@ -36,8 +42,17 @@ func (a *api) GetImage(ctx *gin.Context) {
 		return
 	}
 
+	a.logger.Debug("GetImage: Reading image from storage", logger.M{
+		"image_id": params.ID,
+		"quality":  params.Quality},
+	)
 	img, err := a.imageService.ReadImageFromStorage(params.ID, params.Quality)
 	if err != nil {
+		a.logger.Error("GetImage: Failed to read image from storage", logger.M{
+			"error":    err,
+			"image_id": params.ID,
+			"quality":  params.Quality,
+		})
 		ctx.AbortWithStatusJSON(
 			http.StatusNotFound,
 			gin.H{"error": fmt.Sprintf("Image not found: %s", err)},
@@ -48,7 +63,16 @@ func (a *api) GetImage(ctx *gin.Context) {
 	contentType := http.DetectContentType(img)
 	ctx.Header("Content-type", contentType)
 	ctx.Writer.WriteHeader(http.StatusOK)
+
+	a.logger.Info("GetImage: Sending image to client", logger.M{
+		"image_id": params.ID,
+		"quality":  params.Quality,
+	})
 	if _, err := ctx.Writer.Write(img); err != nil {
+		a.logger.Error("GetImage: Failed to send image to client", logger.M{
+			"error":    err,
+			"image_id": params.ID,
+		})
 		ctx.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{"error": fmt.Sprintf("Failed to send image '%s'", params.ID)},

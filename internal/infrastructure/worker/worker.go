@@ -6,9 +6,11 @@ import (
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/queue"
 	"github.com/andrsj/go-rabbit-image/internal/infrastructure/worker/compressor"
+	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
 
 type WorkerParams struct {
+	logger         logger.Logger
 	client         queue.Consumer
 	fileRepository file.FileRepository
 	compressor     compressor.Compressor
@@ -49,6 +51,12 @@ func WithCompressor(compressor compressor.Compressor) WorkerOption {
 	}
 }
 
+func WithLogger(logger logger.Logger) WorkerOption {
+	return func(p *WorkerParams) {
+		p.logger = logger
+	}
+}
+
 type Worker interface {
 	Start()
 	Stop()
@@ -61,6 +69,8 @@ type worker struct {
 
 	cancelFunc context.CancelFunc
 	context    context.Context
+
+	logger logger.Logger
 }
 
 func New(options ...WorkerOption) *worker {
@@ -74,5 +84,6 @@ func New(options ...WorkerOption) *worker {
 		compressor:     params.compressor,
 		cancelFunc:     params.cancelFunc,
 		context:        params.context,
+		logger:         params.logger.Named("background job"),
 	}
 }

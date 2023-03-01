@@ -1,20 +1,29 @@
 package main
 
 import (
-	"log"
-
 	"github.com/andrsj/go-rabbit-image/internal/app"
+	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
 
+var log logger.Logger
+
 func main() {
-	app, err := app.New()
+	log = logger.NewLogrusLogger("debug")
+	log = log.Named("main")
+
+	app, err := app.New(log)
 	if err != nil {
-		log.Fatalf("Error creating App object: %s", err)
+		log.Fatal("Error creating App object", logger.M{
+			"error": err,
+		})
 	}
 
 	app.Start()
 	app.WaitForShutdown()
 	if err := app.Stop(); err != nil {
-		log.Fatalf("Server shutdown error: %s", err)
+		log.Fatal("Server shutdown error", logger.M{
+			"error": err,
+		})
 	}
+
 }
