@@ -1,0 +1,69 @@
+time="2023-03-01T17:17:02+02:00" level=info msg="Establishing connection to RabbitMQ..." URL="amqp://guest:guest@localhost:5672/" name="RabbitMQ client" queue_name=Queue
+time="2023-03-01T17:17:02+02:00" level=info msg="Connection established successfully" name="RabbitMQ client"
+time="2023-03-01T17:17:02+02:00" level=info msg="Opening a new channel..." name="RabbitMQ client"
+time="2023-03-01T17:17:02+02:00" level=info msg="New channel opened successfully" name="RabbitMQ client"
+time="2023-03-01T17:17:02+02:00" level=info msg="Declaring the main queue..." name="RabbitMQ client"
+time="2023-03-01T17:17:02+02:00" level=info msg="Main queue declared successfully" name="RabbitMQ client"
+time="2023-03-01T17:17:02+02:00" level=info msg="Creating directory" name="file repository" path="C:\\Users\\ADerkach\\Desktop\\go-rabbit-image\\server_images"
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+
+time="2023-03-01T17:17:02+02:00" level=info msg="Registration of controllers" name="Gin engine"
+[GIN-debug] GET    /ping                     --> github.com/andrsj/go-rabbit-image/internal/delivery/http/rest/api.API.Ping-fm (3 handlers)
+[GIN-debug] GET    /img/:id                  --> github.com/andrsj/go-rabbit-image/internal/delivery/http/rest/api.API.GetImage-fm (3 handlers)
+[GIN-debug] POST   /send-image               --> github.com/andrsj/go-rabbit-image/internal/delivery/http/rest/api.API.PublishImage-fm (3 handlers)
+time="2023-03-01T17:17:02+02:00" level=info msg="Starting background job" name=app
+time="2023-03-01T17:17:02+02:00" level=info msg="Consumer has started" name="background job"
+time="2023-03-01T17:17:02+02:00" level=info msg="Starting server" address=":8080" name=app
+time="2023-03-01T17:17:02+02:00" level=info msg="Waiting for shutdown" name=app
+time="2023-03-01T17:17:41+02:00" level=debug msg="GetImage: Validating image params" name=API params="{640c3efb-27e9-4ff5-94b4-47a6029b3bca 25 []}"
+time="2023-03-01T17:17:41+02:00" level=debug msg="GetImage: Reading image from storage" image_id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name=API quality=25
+time="2023-03-01T17:17:41+02:00" level=debug msg="Trying to get image" fields.level=25 id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name="file repository"
+time="2023-03-01T17:17:41+02:00" level=info msg="Successfully retrieved image" fields.level=25 id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name="file repository"
+time="2023-03-01T17:17:41+02:00" level=info msg="Image read from storage" fields.level=25 name=640c3efb-27e9-4ff5-94b4-47a6029b3bca
+time="2023-03-01T17:17:41+02:00" level=info msg="GetImage: Sending image to client" image_id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name=API quality=25
+[GIN] 2023/03/01 - 17:17:41 | 200 |      3.8306ms |       127.0.0.1 | GET      "/img/640c3efb-27e9-4ff5-94b4-47a6029b3bca?quality=25"
+time="2023-03-01T17:18:12+02:00" level=debug msg="GetImage: Validating image params" name=API params="{640c3efb-27e9-4ff5-94b4-47a6029b3bca 100 []}"
+time="2023-03-01T17:18:12+02:00" level=debug msg="GetImage: Reading image from storage" image_id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name=API quality=100
+time="2023-03-01T17:18:12+02:00" level=debug msg="Trying to get image" fields.level=100 id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name="file repository"
+time="2023-03-01T17:18:12+02:00" level=info msg="Successfully retrieved image" fields.level=100 id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name="file repository"
+time="2023-03-01T17:18:12+02:00" level=info msg="Image read from storage" fields.level=100 name=640c3efb-27e9-4ff5-94b4-47a6029b3bca
+time="2023-03-01T17:18:12+02:00" level=info msg="GetImage: Sending image to client" image_id=640c3efb-27e9-4ff5-94b4-47a6029b3bca name=API quality=100
+[GIN] 2023/03/01 - 17:18:12 | 200 |      2.0613ms |       127.0.0.1 | GET      "/img/640c3efb-27e9-4ff5-94b4-47a6029b3bca?quality=100"
+time="2023-03-01T17:18:24+02:00" level=debug msg="Publishing message" content_type=image/png image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="Publisher service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Publishing a message to RabbitMQ" content_type=image/png image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="RabbitMQ client" queue_name=Queue
+time="2023-03-01T17:18:24+02:00" level=info msg="Successfully published a message to RabbitMQ" content_type=image/png image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="RabbitMQ client" queue_name=Queue
+time="2023-03-01T17:18:24+02:00" level=info msg="Message published" content_type=image/png image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="Publisher service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Successfully published the image" content type=image/png id=57ec0ca7-6310-4379-a678-bd0e0968b41b name=API
+time="2023-03-01T17:18:24+02:00" level=info msg="Received message from RabbitMQ" id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="RabbitMQ client"
+[GIN] 2023/03/01 - 17:18:24 | 200 |     46.1654ms |       127.0.0.1 | POST     "/send-image"
+time="2023-03-01T17:18:24+02:00" level=info msg="Compressing image" %=25 name="Comressor service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Creating image" fields.level=100 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:24+02:00" level=info msg="Compressing image" %=75 name="Comressor service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Compressing image" %=50 name="Comressor service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Image compressed successfully" %=25 name="Comressor service"
+time="2023-03-01T17:18:24+02:00" level=info msg="Image created" fields.level=100 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Creating image" fields.level=25 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Image compressed successfully" %=75 name="Comressor service"
+time="2023-03-01T17:18:25+02:00" level=info msg="Image created" fields.level=25 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Image compressed successfully" %=50 name="Comressor service"
+time="2023-03-01T17:18:25+02:00" level=info msg="Creating image" fields.level=50 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Creating image" fields.level=75 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Image created" fields.level=75 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:25+02:00" level=info msg="Image created" fields.level=50 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:40+02:00" level=debug msg="GetImage: Validating image params" name=API params="{57ec0ca7-6310-4379-a678-bd0e0968b41b 100 []}"
+time="2023-03-01T17:18:40+02:00" level=debug msg="GetImage: Reading image from storage" image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name=API quality=100
+time="2023-03-01T17:18:40+02:00" level=debug msg="Trying to get image" fields.level=100 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:40+02:00" level=info msg="Successfully retrieved image" fields.level=100 id=57ec0ca7-6310-4379-a678-bd0e0968b41b name="file repository"
+time="2023-03-01T17:18:40+02:00" level=info msg="Image read from storage" fields.level=100 name=57ec0ca7-6310-4379-a678-bd0e0968b41b
+time="2023-03-01T17:18:40+02:00" level=info msg="GetImage: Sending image to client" image_id=57ec0ca7-6310-4379-a678-bd0e0968b41b name=API quality=100
+[GIN] 2023/03/01 - 17:18:40 | 200 |      2.3172ms |       127.0.0.1 | GET      "/img/57ec0ca7-6310-4379-a678-bd0e0968b41b"
+time="2023-03-01T17:18:49+02:00" level=info msg="Got signal for terminating server" name=app signal=interrupt
+time="2023-03-01T17:18:49+02:00" level=info msg="Stopping background job" name=app
+time="2023-03-01T17:18:49+02:00" level=info msg="Closing keep-alive connections" name=app
+time="2023-03-01T17:18:49+02:00" level=info msg="Shutdown server . . . Timeout" name=app timeout=5s
+time="2023-03-01T17:18:49+02:00" level=info msg="Shutdown job . . ." name="background job"
+time="2023-03-01T17:18:49+02:00" level=info msg="Server exiting" name=app
