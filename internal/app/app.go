@@ -36,9 +36,14 @@ type App struct {
 	log logger.Logger
 }
 
+// New creates a new App object and returns a pointer to it.
 func New(log logger.Logger) (*App, error) {
+	// It takes a logger.Logger object as input and returns an error
+	// if it fails to create any of the necessary components.
 	log = log.Named("app")
 
+	// It initializes a rabbitMQ client with the given URL
+	// and queue name and logs errors if any occur.
 	rabbitClient, err := client.New(rabbitURL, queueName, log)
 	if err != nil {
 		err = fmt.Errorf("error connected with RabbitMQ: %s", err)
@@ -49,6 +54,8 @@ func New(log logger.Logger) (*App, error) {
 	}
 	publisher := publisher.New(rabbitClient, log)
 
+	// It creates a file storage repository and
+	// an associated file service, logging any errors that occur.
 	pathToServerFiles := filepath.Join(path, image_folder)
 	fileStorage, err := repository.New(pathToServerFiles, log)
 	if err != nil {
@@ -59,11 +66,16 @@ func New(log logger.Logger) (*App, error) {
 	}
 	fileService := storage.New(fileStorage, log)
 
+	// It creates an API router and handler with the file service
+	// and publisher, and registers the router to the handler.
 	api_router := api.New(fileService, publisher, log)
 	api_handler := handler.New(log)
 	api_handler.Register(api_router)
 
+	// It creates a compressor with the logger.
 	compressor := compressor.New(log)
+
+	// It creates a job, job's context, cancel function for the worker using the logger.
 	jobContext, jobCancelFunc := context.WithCancel(context.Background())
 	job := worker.New(
 		worker.WithClient(rabbitClient),
@@ -83,11 +95,13 @@ func New(log logger.Logger) (*App, error) {
 	}, nil
 }
 
+// Start method is responsible for starting the server and background job.
 func (a *App) Start() {
-
+	// Start the background job.
 	a.log.Info("Starting background job", nil)
 	a.job.Start()
 
+	// Launch the server in a separate goroutine.
 	a.log.Info("Starting server", logger.M{
 		"address": a.srv.Addr,
 	})
@@ -101,12 +115,15 @@ func (a *App) Start() {
 }
 
 func (a *App) Stop() error {
+	// Stop background job
 	a.log.Info("Stopping background job", nil)
 	a.job.Stop()
 
+	// Close keep-alive connections
 	a.log.Info("Closing keep-alive connections", nil)
 	a.srv.SetKeepAlivesEnabled(false)
 
+	// Shutdown server with a timeout
 	a.log.Info("Shutdown server . . . Timeout", logger.M{
 		"timeout": TimeoutDuration,
 	})
@@ -125,8 +142,24 @@ func (a *App) Stop() error {
 	return nil
 }
 
+/*
+WaitForShutdown function sets up a channel to listen for signals
+indicating that the server should be shut down.
+
+It logs when it begins waiting for shutdown
+and when it receives a signal to terminate the server.
+*/
 func (a *App) WaitForShutdown() {
 	a.log.Info("Waiting for shutdown", nil)
+
+	/*
+		Specifically, it creates a channel to listen for SIGINT and SIGTERM signals,
+		which are sent to the process when the user requests to terminate the program
+		(e.g. by pressing Ctrl+C in the terminal).
+
+		Once the signal is received, the function logs the signal
+		that was received and the server will begin the shutdown process.
+	*/
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit

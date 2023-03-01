@@ -19,9 +19,15 @@ type rabbitMQ struct {
 
 var _ queue.MessageBroker = (*rabbitMQ)(nil)
 
+// New function is responsible for creating a new instance
+// of the rabbitMQ struct, which represents a client for connecting to RabbitMQ.
+//
+// The function takes three arguments: the URL of the RabbitMQ instance,
+// the name of the queue to be used, and a logger object to be used for logging messages.
 func New(url, queue_name string, log logger.Logger) (*rabbitMQ, error) {
 	log = log.Named("RabbitMQ client")
 
+	// Attempts to establish a connection to RabbitMQ
 	log.Info("Establishing connection to RabbitMQ...", logger.M{"URL": url, "queue_name": queue_name})
 	conn, err := amqp.Dial(url)
 	if err != nil {
@@ -30,6 +36,7 @@ func New(url, queue_name string, log logger.Logger) (*rabbitMQ, error) {
 	}
 	log.Info("Connection established successfully", nil)
 
+	// Attempts to open a new channel
 	log.Info("Opening a new channel...", nil)
 	channel, err := conn.Channel()
 	if err != nil {
@@ -38,6 +45,7 @@ func New(url, queue_name string, log logger.Logger) (*rabbitMQ, error) {
 	}
 	log.Info("New channel opened successfully", nil)
 
+	// Attempts to declare the main queue
 	log.Info("Declaring the main queue...", nil)
 	_, err = channel.QueueDeclare(
 		queue_name,
@@ -61,12 +69,15 @@ func New(url, queue_name string, log logger.Logger) (*rabbitMQ, error) {
 	}, nil
 }
 
+// Publish publishes a message to RabbitMQ
 func (r *rabbitMQ) Publish(ctx context.Context, message []byte, image_id, contentType string) error {
+	// Logging that the message is being published
 	r.logger.Info("Publishing a message to RabbitMQ", logger.M{
 		"queue_name":   r.MainQueue,
 		"image_id":     image_id,
 		"content_type": contentType,
 	})
+	// Publishing the message to RabbitMQ with given context, image ID, content type
 	err := r.channel.PublishWithContext(ctx,
 		"",
 		r.MainQueue,
@@ -80,12 +91,15 @@ func (r *rabbitMQ) Publish(ctx context.Context, message []byte, image_id, conten
 			Body:        message,
 		},
 	)
+	// If there's an error, logging that publishing the message failed
 	if err != nil {
 		r.logger.Error("Failed to publish a message to RabbitMQ", logger.M{
 			"error": err,
 		})
 		return err
 	}
+
+	// Logging that the message has been published successfully
 	r.logger.Info("Successfully published a message to RabbitMQ", logger.M{
 		"queue_name":   r.MainQueue,
 		"image_id":     image_id,
@@ -94,7 +108,9 @@ func (r *rabbitMQ) Publish(ctx context.Context, message []byte, image_id, conten
 	return nil
 }
 
+// MustConsumeMessages method is to consume messages from the main queue and return them to the caller.
 func (r *rabbitMQ) MustConsumeMessages() (<-chan dto.MessageDTO, <-chan error) {
+	// Consume messages from the main queue
 	msgs, err := r.channel.Consume(
 		r.MainQueue,
 		"",
@@ -109,19 +125,24 @@ func (r *rabbitMQ) MustConsumeMessages() (<-chan dto.MessageDTO, <-chan error) {
 		panic(err)
 	}
 
+	// Create channels for receiving messages and errors
 	messageCh := make(chan dto.MessageDTO)
 	errorCh := make(chan error, 1)
 
 	go func() {
+		// Iterate over messages received from the main queue
 		for msg := range msgs {
 			r.logger.Info("Received message from RabbitMQ", logger.M{"id": msg.Headers["id"].(string)})
 
+			// Send the received message to the messageCh channel
 			messageCh <- dto.MessageDTO{
 				Body:        msg.Body,
 				ImageID:     msg.Headers["id"].(string),
 				ContentType: msg.ContentType,
 			}
 		}
+
+		// Notify the errorCh channel that the RabbitMQ channel is closed
 		r.logger.Warn("RabbitMQ channel closed", nil)
 		errorCh <- amqp.ErrClosed
 	}()

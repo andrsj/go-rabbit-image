@@ -19,6 +19,10 @@ type WorkerParams struct {
 	context    context.Context
 }
 
+/*
+Actually the FunctionParameters pattern is no needed here, but...
+I just want to show that I know it and don't want to delete the implementation of this pattern
+*/
 type WorkerOption func(*WorkerParams)
 
 func WithClient(client queue.Consumer) WorkerOption {
@@ -75,6 +79,13 @@ type worker struct {
 
 func New(options ...WorkerOption) *worker {
 	params := &WorkerParams{}
+
+	// There is a problem that I DON'T CHECK
+	// if some REQUIRED parameter is not provided
+	//
+	// I can validate the <nil> value in functions,
+	// but how to check if all With<Parameter> functions
+	// was called?
 	for _, option := range options {
 		option(params)
 	}
@@ -84,6 +95,9 @@ func New(options ...WorkerOption) *worker {
 		compressor:     params.compressor,
 		cancelFunc:     params.cancelFunc,
 		context:        params.context,
-		logger:         params.logger.Named("background job"),
+		// Question: is it good to pass the name here?
+		// Because it's a constructor of the worker instance
+		// ..., but is it idiomatic way of GO?
+		logger: params.logger.Named("background job"),
 	}
 }

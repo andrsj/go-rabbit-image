@@ -10,13 +10,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// PublishImage represents the POST endpoint for publishing users images
 func (a *api) PublishImage(ctx *gin.Context) {
+	// Retrieve the image file from the form data
 	file, err := ctx.FormFile("image")
 	if err != nil {
 		a.logger.Error("Can't get image from form data", logger.M{"error": err})
 		return
 	}
 
+	// Open the image file
 	src, err := file.Open()
 	if err != nil {
 		a.logger.Error("Can't open the image file", logger.M{"error": err})
@@ -28,6 +31,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 	}
 	defer src.Close()
 
+	// Read the contents of the image file into a buffer
 	buf := make([]byte, file.Size)
 	_, err = io.ReadFull(src, buf)
 	if err != nil {
@@ -39,6 +43,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 		return
 	}
 
+	// Detect the content type of the image and validate it
 	contentType := http.DetectContentType(buf)
 	switch contentType {
 	case "image/jpeg", "image/png":
@@ -51,6 +56,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 		return
 	}
 
+	// Generate a unique ID for the image and publish it to the message queue
 	imageID := uuid.New().String()
 
 	err = a.publisherService.Publish(ctx, buf, imageID, contentType)
@@ -63,6 +69,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 		return
 	}
 
+	// Respond with a success message and the ID of the published image
 	a.logger.Info("Successfully published the image", logger.M{
 		"id":           imageID,
 		"content type": contentType,
