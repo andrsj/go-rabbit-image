@@ -7,7 +7,7 @@ import (
 )
 
 type Publisher interface {
-	Publish(ctx context.Context, message []byte, image_id, contentType string) error
+	Publish(ctx context.Context, message []byte, imageID, contentType string) error
 }
 
 type Consumer interface {

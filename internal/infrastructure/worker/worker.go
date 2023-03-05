@@ -9,10 +9,10 @@ import (
 	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
 
-type WorkerParams struct {
+type Params struct {
 	logger         logger.Logger
 	client         queue.Consumer
-	fileRepository file.FileRepository
+	fileRepository file.Repository
 	compressor     compressor.Compressor
 
 	cancelFunc context.CancelFunc
@@ -21,42 +21,42 @@ type WorkerParams struct {
 
 /*
 Actually the FunctionParameters pattern is no needed here, but...
-I just want to show that I know it and don't want to delete the implementation of this pattern
+I just want to show that I know it and don't want to delete the implementation of this pattern.
 */
-type WorkerOption func(*WorkerParams)
+type Option func(*Params)
 
-func WithClient(client queue.Consumer) WorkerOption {
-	return func(p *WorkerParams) {
+func WithClient(client queue.Consumer) Option {
+	return func(p *Params) {
 		p.client = client
 	}
 }
 
-func WithCancel(cancel context.CancelFunc) WorkerOption {
-	return func(p *WorkerParams) {
+func WithCancel(cancel context.CancelFunc) Option {
+	return func(p *Params) {
 		p.cancelFunc = cancel
 	}
 }
 
-func WithContext(ctx context.Context) WorkerOption {
-	return func(p *WorkerParams) {
+func WithContext(ctx context.Context) Option {
+	return func(p *Params) {
 		p.context = ctx
 	}
 }
 
-func WithFileRepository(fileRepository file.FileRepository) WorkerOption {
-	return func(p *WorkerParams) {
+func WithFileRepository(fileRepository file.Repository) Option {
+	return func(p *Params) {
 		p.fileRepository = fileRepository
 	}
 }
 
-func WithCompressor(compressor compressor.Compressor) WorkerOption {
-	return func(p *WorkerParams) {
+func WithCompressor(compressor compressor.Compressor) Option {
+	return func(p *Params) {
 		p.compressor = compressor
 	}
 }
 
-func WithLogger(logger logger.Logger) WorkerOption {
-	return func(p *WorkerParams) {
+func WithLogger(logger logger.Logger) Option {
+	return func(p *Params) {
 		p.logger = logger
 	}
 }
@@ -69,7 +69,7 @@ type Worker interface {
 type worker struct {
 	client         queue.Consumer
 	compressor     compressor.Compressor
-	fileRepository file.FileRepository
+	fileRepository file.Repository
 
 	cancelFunc context.CancelFunc
 	context    context.Context
@@ -77,8 +77,8 @@ type worker struct {
 	logger logger.Logger
 }
 
-func New(options ...WorkerOption) *worker {
-	params := &WorkerParams{}
+func New(options ...Option) *worker {
+	params := &Params{nil, nil, nil, nil, nil, nil}
 
 	// There is a problem that I DON'T CHECK
 	// if some REQUIRED parameter is not provided
@@ -89,6 +89,7 @@ func New(options ...WorkerOption) *worker {
 	for _, option := range options {
 		option(params)
 	}
+
 	return &worker{
 		client:         params.client,
 		fileRepository: params.fileRepository,

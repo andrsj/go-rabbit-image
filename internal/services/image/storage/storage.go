@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"fmt"
+
 	"github.com/andrsj/go-rabbit-image/internal/domain/repositories/file"
 	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
@@ -13,14 +15,14 @@ type FileStorage interface {
 
 // fileStorageService represents a service that writes and reads image data to/from a file storage.
 type fileStorageService struct {
-	fileStorage file.FileRepository
+	fileStorage file.Repository
 	logger      logger.Logger
 }
 
 var _ FileStorage = (*fileStorageService)(nil)
 
 // New creates a new instance of fileStorageService.
-func New(storage file.FileRepository, logger logger.Logger) *fileStorageService {
+func New(storage file.Repository, logger logger.Logger) *fileStorageService {
 	return &fileStorageService{
 		fileStorage: storage,
 		logger:      logger,
@@ -35,13 +37,15 @@ func (f *fileStorageService) WriteImageToStorage(image []byte, name string, leve
 			"name":  name,
 			"level": level,
 		})
-		return err
+
+		return fmt.Errorf("%w", err)
 	}
 
 	f.logger.Info("Image written to storage", logger.M{
 		"name":  name,
 		"level": level,
 	})
+
 	return nil
 }
 
@@ -54,12 +58,14 @@ func (f fileStorageService) ReadImageFromStorage(name string, level string) ([]b
 			"name":  name,
 			"level": level,
 		})
-		return nil, err
+
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	f.logger.Info("Image read from storage", logger.M{
 		"name":  name,
 		"level": level,
 	})
+
 	return data, nil
 }

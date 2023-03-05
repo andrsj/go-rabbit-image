@@ -11,23 +11,24 @@ type logrusLogger struct {
 var _ Logger = (*logrusLogger)(nil)
 
 func NewLogrusLogger(level string) *logrusLogger {
-	var l logrus.Level
+	var logrusLevel logrus.Level
 
 	switch level {
 	case "error":
-		l = logrus.ErrorLevel
+		logrusLevel = logrus.ErrorLevel
 	case "warn":
-		l = logrus.WarnLevel
+		logrusLevel = logrus.WarnLevel
 	case "info":
-		l = logrus.InfoLevel
+		logrusLevel = logrus.InfoLevel
 	case "debug":
-		l = logrus.DebugLevel
+		logrusLevel = logrus.DebugLevel
 	default:
-		l = logrus.InfoLevel
+		logrusLevel = logrus.InfoLevel
 	}
 
 	logger := logrus.New()
-	logger.SetLevel(l)
+	logger.SetLevel(logrusLevel)
+
 	return &logrusLogger{logger: logrus.NewEntry(logger)}
 }
 

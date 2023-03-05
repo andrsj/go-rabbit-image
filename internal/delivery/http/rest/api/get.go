@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -17,12 +18,11 @@ const (
 )
 
 type imageParams struct {
-	ID            string
-	Quality       string
-	AllowedValues []string
+	ID      string
+	Quality string
 }
 
-// GetImage method represents GET endpoint for user
+// GetImage method represents GET endpoint for user.
 func (a *api) GetImage(ctx *gin.Context) {
 	// Get image parameters from URL
 	params := imageParams{
@@ -32,6 +32,7 @@ func (a *api) GetImage(ctx *gin.Context) {
 
 	// Validate image parameters
 	a.logger.Debug("GetImage: Validating image params", logger.M{"params": params})
+
 	err := validateGetImageParams(params)
 	if err != nil {
 		// Log and return error message to client
@@ -43,14 +44,16 @@ func (a *api) GetImage(ctx *gin.Context) {
 			http.StatusBadRequest,
 			gin.H{"error": fmt.Sprintf("Wrong query parameter: %s", err)},
 		)
+
 		return
 	}
 
 	// Read image from file storage
 	a.logger.Debug("GetImage: Reading image from storage", logger.M{
 		"image_id": params.ID,
-		"quality":  params.Quality},
-	)
+		"quality":  params.Quality,
+	})
+
 	img, err := a.imageService.ReadImageFromStorage(params.ID, params.Quality)
 	if err != nil {
 		// Log and return error message to client
@@ -63,6 +66,7 @@ func (a *api) GetImage(ctx *gin.Context) {
 			http.StatusNotFound,
 			gin.H{"error": fmt.Sprintf("Image not found: %s", err)},
 		)
+
 		return
 	}
 
@@ -76,6 +80,7 @@ func (a *api) GetImage(ctx *gin.Context) {
 		"image_id": params.ID,
 		"quality":  params.Quality,
 	})
+
 	if _, err := ctx.Writer.Write(img); err != nil {
 		// Log and return error message to client
 		a.logger.Error("GetImage: Failed to send image to client", logger.M{
@@ -86,15 +91,21 @@ func (a *api) GetImage(ctx *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{"error": fmt.Sprintf("Failed to send image '%s'", params.ID)},
 		)
+
 		return
 	}
 }
 
-// validateGetImageParams validates the image parameters
+var (
+	errInvalidUUID  = errors.New("invalid format of ID")
+	errQualityImage = errors.New("invalid quality parameter: use 100, 75, 50 or 25")
+)
+
+// validateGetImageParams validates the image parameters.
 func validateGetImageParams(params imageParams) error {
 	// Check if the ID parameter has a valid UUID format
 	if !isValidUUID(params.ID) {
-		return fmt.Errorf("invalid format of ID")
+		return errInvalidUUID
 	}
 
 	// Check if the quality parameter is valid
@@ -102,12 +113,13 @@ func validateGetImageParams(params imageParams) error {
 	case DefaultLevel, Level1, Level2, Level3:
 		return nil
 	default:
-		return fmt.Errorf("invalid quality parameter: use 100, 75, 50 or 25")
+		return fmt.Errorf("%w: %s quality", errQualityImage, params.Quality)
 	}
 }
 
-// isValidUUID checks if the given string is a valid UUID
+// isValidUUID checks if the given string is a valid UUID.
 func isValidUUID(s string) bool {
 	regex := regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+
 	return regex.MatchString(s)
 }

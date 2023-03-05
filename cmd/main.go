@@ -5,10 +5,8 @@ import (
 	"github.com/andrsj/go-rabbit-image/pkg/logger"
 )
 
-var log logger.Logger
-
 func main() {
-	log = logger.NewLogrusLogger("debug")
+	var log logger.Logger = logger.NewLogrusLogger("debug")
 	log = log.Named("main")
 
 	app, err := app.New(log)
@@ -20,6 +18,7 @@ func main() {
 
 	app.Start()
 	app.WaitForShutdown()
+
 	if err := app.Stop(); err != nil {
 		log.Fatal("Server shutdown error", logger.M{
 			"error": err,

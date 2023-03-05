@@ -10,12 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// PublishImage represents the POST endpoint for publishing users images
+// PublishImage represents the POST endpoint for publishing users images.
 func (a *api) PublishImage(ctx *gin.Context) {
 	// Retrieve the image file from the form data
 	file, err := ctx.FormFile("image")
 	if err != nil {
 		a.logger.Error("Can't get image from form data", logger.M{"error": err})
+
 		return
 	}
 
@@ -27,12 +28,14 @@ func (a *api) PublishImage(ctx *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{"error": fmt.Sprintf("Can't open the file: %s", err)},
 		)
+
 		return
 	}
 	defer src.Close()
 
 	// Read the contents of the image file into a buffer
 	buf := make([]byte, file.Size)
+
 	_, err = io.ReadFull(src, buf)
 	if err != nil {
 		a.logger.Error("Can't read the image", logger.M{"error": err})
@@ -40,6 +43,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{"error": fmt.Sprintf("Can't read the image: %s", err)},
 		)
+
 		return
 	}
 
@@ -53,6 +57,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 			http.StatusBadRequest,
 			gin.H{"error": fmt.Sprintf("Can't accept the type '%s': please, use jpg/png type", contentType)},
 		)
+
 		return
 	}
 
@@ -66,6 +71,7 @@ func (a *api) PublishImage(ctx *gin.Context) {
 			http.StatusInternalServerError,
 			gin.H{"error": fmt.Sprintf("Can't publish the image: %s", err)},
 		)
+
 		return
 	}
 

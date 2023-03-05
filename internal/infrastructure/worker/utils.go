@@ -2,11 +2,17 @@ package worker
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"net/http"
+)
+
+var (
+	errDecodeImage = errors.New("can't decode image")
+	errEncodeImage = errors.New("can't encode image")
 )
 
 /*
@@ -24,17 +30,23 @@ the jpeg.Decode or png.Decode function depending on the content type.
 If the content type is not supported,
 the function returns an error with a message that the content type is unsupported.
 */
-func decodeImage(buf []byte) (img image.Image, contentType string, err error) {
-	contentType = http.DetectContentType(buf)
+func decodeImage(buf []byte) (image.Image, string, error) {
+	var (
+		img image.Image
+		err error
+	)
+
+	contentType := http.DetectContentType(buf)
 	switch contentType {
 	case "image/jpeg", "image/jpg":
 		img, err = jpeg.Decode(bytes.NewReader(buf))
 	case "image/png":
 		img, err = png.Decode(bytes.NewReader(buf))
 	default:
-		err = fmt.Errorf("can't decode []byte to image.Image. Unsupported content-type: %s", contentType)
+		err = fmt.Errorf("%w: []byte to image.Image. Unsupported content-type: %s", errDecodeImage, contentType)
 	}
-	return
+
+	return img, contentType, err
 }
 
 /*
@@ -51,12 +63,17 @@ the bytes in the buffer and nil error, otherwise it returns an error.
 */
 func encodeImage(img image.Image, contentType string) ([]byte, error) {
 	var err error
+
 	buffer := new(bytes.Buffer)
+
 	switch contentType {
 	case "image/jpeg", "image/jpg":
 		err = jpeg.Encode(buffer, img, nil)
 	case "image/png":
 		err = png.Encode(buffer, img)
+	default:
+		err = fmt.Errorf("%w: unknown content type: '%s'", errEncodeImage, contentType)
 	}
+
 	return buffer.Bytes(), err
 }

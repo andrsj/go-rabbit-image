@@ -1,6 +1,6 @@
 package dto
 
-// MessageDTO represents a message received from a message broker queue
+// MessageDTO represents a message received from a message broker queue.
 type MessageDTO struct {
 	// Slice of bytes that contains the message body.
 	Body []byte
