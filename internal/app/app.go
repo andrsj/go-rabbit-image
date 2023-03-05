@@ -27,7 +27,7 @@ const (
 	image_folder    = "/server_images"
 	rabbitURL       = "amqp://guest:guest@localhost:5672/"
 	queueName       = "Queue"
-	TimeoutDuration = time.Second * 5
+	timeoutDuration = time.Second * 5
 )
 
 type App struct {
@@ -125,9 +125,9 @@ func (a *App) Stop() error {
 
 	// Shutdown server with a timeout
 	a.log.Info("Shutdown server . . . Timeout", logger.M{
-		"timeout": TimeoutDuration,
+		"timeout": timeoutDuration,
 	})
-	ctx, cancel := context.WithTimeout(context.Background(), TimeoutDuration)
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel()
 
 	if err := a.srv.Shutdown(ctx); err != nil {
