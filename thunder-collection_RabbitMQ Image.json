@@ -1,0 +1,48 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "RabbitMQ Image",
+    "dateExported": "2023-03-01T16:29:04.992Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "d67130ce-c597-40a8-840f-0d3ac18a7887",
+            "colId": "a51df411-c010-4a1f-bb9a-dc3d1954ba4c",
+            "containerId": "",
+            "name": "POST image to RabbitMQ",
+            "url": "localhost:8080/send-image",
+            "method": "POST",
+            "sortNum": 15000,
+            "created": "2023-02-27T19:17:38.490Z",
+            "modified": "2023-03-01T15:18:24.825Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "formdata",
+                "raw": "",
+                "form": [],
+                "files": [
+                    {
+                        "name": "image",
+                        "value": "<PATH TO IMAGE>"
+                    }
+                ]
+            },
+            "tests": []
+        },
+        {
+            "_id": "7ef18e2a-1cde-4acb-95bd-bf25b6fd82c4",
+            "colId": "a51df411-c010-4a1f-bb9a-dc3d1954ba4c",
+            "containerId": "",
+            "name": "GET Image Single",
+            "url": "localhost:8080/img/<UUID OF IMAGE>",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-02-25T20:23:46.745Z",
+            "modified": "2023-03-01T16:27:07.366Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}
