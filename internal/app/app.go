@@ -23,11 +23,11 @@ import (
 )
 
 const (
-	path            = "C:/Users/ADerkach/Desktop/go-rabbit-image/"
-	image_folder    = "/server_images"
-	rabbitURL       = "amqp://guest:guest@localhost:5672/"
-	queueName       = "Queue"
-	timeoutDuration = time.Second * 5
+	imageFolder           = "server_images"
+	rabbitURL             = "amqp://guest:guest@localhost:5672/"
+	queueName             = "Queue"
+	timeoutDuration       = time.Second * 5
+	imageStorageRootEnvID = "IMAGE_STORAGE_ROOT"
 )
 
 type App struct {
@@ -56,7 +56,15 @@ func New(log logger.Logger) (*App, error) {
 
 	// It creates a file storage repository and
 	// an associated file service, logging any errors that occur.
-	pathToServerFiles := filepath.Join(path, image_folder)
+	storageRootPath, err := resolveImageStorageRoot()
+	if err != nil {
+		log.Error("Can't determine image storage root", logger.M{
+			"error": err,
+		})
+		return nil, fmt.Errorf("can't determine image storage root: %w", err)
+	}
+
+	pathToServerFiles := filepath.Join(storageRootPath, imageFolder)
 	fileStorage, err := repository.New(pathToServerFiles, log)
 	if err != nil {
 		log.Error("Can't create file storage", logger.M{
@@ -166,4 +174,18 @@ func (a *App) WaitForShutdown() {
 	a.log.Info("Got signal for terminating server", logger.M{
 		"signal": sig,
 	})
+}
+
+func resolveImageStorageRoot() (string, error) {
+	storageRoot := os.Getenv(imageStorageRootEnvID)
+	if storageRoot != "" {
+		return storageRoot, nil
+	}
+
+	storageRoot, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("get working directory: %w", err)
+	}
+
+	return storageRoot, nil
 }
