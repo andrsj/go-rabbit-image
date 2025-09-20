@@ -16,6 +16,10 @@ func (a *api) PublishImage(ctx *gin.Context) {
 	file, err := ctx.FormFile("image")
 	if err != nil {
 		a.logger.Error("Can't get image from form data", logger.M{"error": err})
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{"error": fmt.Sprintf("Can't get image from form data: %s", err)},
+		)
 
 		return
 	}
